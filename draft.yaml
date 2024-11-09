@@ -1,0 +1,40 @@
+models:
+  Ticket:
+    title: string index
+    description: text
+    priority: string
+    department: string
+    location_id: bigInteger
+    display_id: string unique
+    category: string
+    assigned_to: bigInteger
+    status: string
+    created_by: foreignId constrained:users
+    updated_by: foreignId constrained:users
+    relationships:
+      hasMany: Actions
+      belongsTo: Location
+  Action:
+    title: string index
+    ticket_id: bigInt index
+    notes: text
+    email: text
+    display_id: string
+    category: string
+    created_by: foreignId constrained:users
+    updated_by: foreignId constrained:users
+    relationships:
+        belongsTo: Ticket
+  Location:
+    title: string
+    address: string
+    city: string
+    state: string
+    zip: string
+    brand: string
+    display_id: string
+    phone: string
+    relationships:
+      hasMany: Ticket
+
+

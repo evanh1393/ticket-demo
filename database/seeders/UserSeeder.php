@@ -3,10 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class UserSeeder extends Seeder
 {
@@ -19,12 +17,42 @@ class UserSeeder extends Seeder
     {
         $numUsers = 125;
 
-        // Create 125 random users using the factory
-        User::factory()->count($numUsers)->create();
+        // Retrieve roles
+        $adminRole = Role::findByName('Admin');
+        $distManagerRole = Role::findByName('District Manager');
+        $facilitiesRole = Role::findByName('Facilities Agent');
+        $itRole = Role::findByName('IT Agent');
+        $basicRole = Role::findByName('Basic User');
+        $storeManagerRole = Role::findByName('Store Manager');
+
+        // Create users and assign roles
+        User::factory()->count(4)->create()->each(function ($user) use ($adminRole) {
+            $user->assignRole($adminRole);
+        });
+
+        User::factory()->count(6)->create()->each(function ($user) use ($distManagerRole) {
+            $user->assignRole($distManagerRole);
+        });
+
+        User::factory()->count(2)->create()->each(function ($user) use ($facilitiesRole) {
+            $user->assignRole($facilitiesRole);
+        });
+
+        User::factory()->count(2)->create()->each(function ($user) use ($itRole) {
+            $user->assignRole($itRole);
+        });
+
+        User::factory()->count(6)->create()->each(function ($user) use ($basicRole) {
+            $user->assignRole($basicRole);
+        });
+
+        User::factory()->count($numUsers - 20)->create()->each(function ($user) use ($storeManagerRole) {
+            $user->assignRole($storeManagerRole);
+        });
 
         // Create or update a specific user with known credentials
         User::updateOrCreate(
-            ['email' => 'your-email@example.com'], // Specify your email
+            ['email' => 'evanh1393@gmail.com'], // Specify your email
             [
                 'name' => 'Evan Hoefling',
                 'password' => config('defaults.default_user_password'), // Specify your password

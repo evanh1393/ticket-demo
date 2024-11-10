@@ -2,9 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use App\Models\Location;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class LocationFactory extends Factory
 {
@@ -26,8 +25,8 @@ class LocationFactory extends Factory
             'city' => $this->faker->city(),
             'state' => $this->faker->word(),
             'zip' => $this->faker->postcode(),
-            'brand' => $this->faker->word(),
-            'display_id' => $this->faker->word(),
+            'brand' => $this->faker->randomElement(['BrandA', 'BrandB', 'BrandC', 'BrandD', 'BrandE']),
+            'display_id' => Location::generateDisplayId(),
             'phone' => $this->faker->phoneNumber(),
         ];
     }

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
@@ -51,7 +51,7 @@ class UserSeeder extends Seeder
         });
 
         // Create or update a specific user with known credentials
-        User::updateOrCreate(
+        $evanAdmin = User::updateOrCreate(
             ['email' => 'evanh1393@gmail.com'], // Specify your email
             [
                 'name' => 'Evan Hoefling',
@@ -60,5 +60,7 @@ class UserSeeder extends Seeder
                 'email' => 'evanh1393@gmail.com'
             ]
         );
+
+        $evanAdmin->assignRole($adminRole);
     }
 }

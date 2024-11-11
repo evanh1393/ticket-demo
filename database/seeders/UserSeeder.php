@@ -15,8 +15,6 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $numUsers = 125;
-
         // Retrieve roles
         $adminRole = Role::findByName('Admin');
         $distManagerRole = Role::findByName('District Manager');
@@ -46,7 +44,7 @@ class UserSeeder extends Seeder
             $user->assignRole($basicRole);
         });
 
-        User::factory()->count($numUsers - 20)->create()->each(function ($user) use ($storeManagerRole) {
+        User::factory()->count(105)->create()->each(function ($user) use ($storeManagerRole) {
             $user->assignRole($storeManagerRole);
         });
 

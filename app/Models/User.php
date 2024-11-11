@@ -45,6 +45,11 @@ class User extends Authenticatable
         return $this->hasMany(Ticket::class, 'created_by');
     }
 
+    public function getBrandNameAttribute(): string
+    {
+        return $this->locations->pluck('brand')->implode(', ');
+    }
+
     /**
      * Get the tickets updated by the user.
      */
@@ -59,20 +64,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Scope a query to only include users of a given brand.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $brand
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeFilterByBrand($query, $brand)
-    {
-        return $query->whereHas('locations', function ($query) use ($brand) {
-            $query->where('brand', $brand);
-        });
-    }
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -84,4 +75,5 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
 }

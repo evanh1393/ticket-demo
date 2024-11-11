@@ -43,12 +43,14 @@ class Location extends Model
      */
     public static function generateDisplayId(): string
     {
-        // Ensure the string is unique
-        do {
-            $displayId = 'LOC_' . strtoupper(substr(md5(uniqid(rand(), true)), 0, 7));
-        } while (self::displayIdExists($displayId));
+        for ($i = 0; $i < 5; $i++) {
+            $displayId = 'TCKT_' . substr(md5(uniqid(rand(), true)), 0, 7);
+            if (!self::displayIdExists($displayId)) {
+                return $displayId;
+            }
+        }
 
-        return $displayId;
+        throw new \Exception('Failed to generate a unique display ID after 5 attempts.');
     }
 
     /**

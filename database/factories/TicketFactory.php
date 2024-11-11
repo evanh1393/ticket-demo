@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
+use App\Enums\TicketStatus;
 use App\Models\Location;
 use App\Models\Ticket;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Log;
 
 class TicketFactory extends Factory
 {
@@ -21,19 +23,31 @@ class TicketFactory extends Factory
      */
     public function definition(): array
     {
+        $createdAt = $this->faker->dateTimeBetween('-2 years', 'now');
+        $updatedAt = $this->faker->dateTimeBetween($createdAt, 'now');
+
+        $user = User::inRandomOrder()->first();
+        Log::info('User in TicketFactory:', ['user' => $user]);
+
+        if (!$user) {
+            throw new \Exception('No users found. Please ensure users exist before running the TicketFactory.');
+        }
+
         return [
             'title' => $this->faker->sentence(4),
             'description' => $this->faker->text(),
             'priority' => $this->faker->word(),
             'department' => $this->faker->word(),
-            'location_id' => Location::factory(),
-            'display_id' => $this->faker->word(),
+            'location_id' => Location::inRandomOrder()->first()->id,
+            'display_id' => Ticket::generateDisplayId(),
             'category' => $this->faker->word(),
             'sub_category' => $this->faker->word(),
-            'assigned_to' => $this->faker->numberBetween(-100000, 100000),
-            'status' => $this->faker->word(),
-            'created_by' => $this->faker->word(),
-            'updated_by' => $this->faker->word(),
+            'assigned_to' => User::inRandomOrder()->first()->id,
+            'status' => $this->faker->randomElement(TicketStatus::cases())->value,
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+            'created_at' => $createdAt,
+            'updated_at' => $updatedAt,
         ];
     }
 }

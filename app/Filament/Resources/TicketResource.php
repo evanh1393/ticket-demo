@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\TicketStatus;
 use App\Filament\Resources\TicketResource\Pages;
-use App\Filament\Resources\TicketResource\RelationManagers;
 use App\Models\Ticket;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,8 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class TicketResource extends Resource
@@ -62,12 +60,10 @@ class TicketResource extends Resource
                     ]),
                 Forms\Components\Select::make('status')
                     ->required()
-                    ->options([
-                        'Open' => 'Open',
-                        'Pending' => 'Pending',
-                        'Solved' => 'Solved',
-                        'Closed' => 'Closed',
-                    ]),
+                    ->options(array_combine(
+                        array_map(fn($status) => $status->value, TicketStatus::cases()),
+                        array_map(fn($status) => $status->value, TicketStatus::cases())
+                    )),
             ]);
     }
 
@@ -95,9 +91,10 @@ class TicketResource extends Resource
                     ->sortable(),
                 ViewColumn::make('accept_ticket')
                     ->view('tables.actions.accept_ticket')
-                    ->visible(fn ($record): bool => Auth::user()->can('update', $record)),
+                    ->visible(fn($record): bool => Auth::user()->can('update', $record)),
                 Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_by')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('updated_by')

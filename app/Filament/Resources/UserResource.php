@@ -12,7 +12,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
@@ -49,12 +48,17 @@ class UserResource extends Resource
                             ->options(Role::all()->pluck('name', 'id')->toArray())
                             ->required(),
                     ])->columns(1)
-                    ->visible(function () {
-                        $user = auth()->user();
-                        Log::info('User:', ['user' => $user]);
-                        Log::info('User has admin role:', ['hasRole' => $user->hasRole('admin')]);
-                        return $user->hasRole('admin');
-                    }),
+                    ->visible(fn() => auth()->user()->hasRole('Admin')),
+                Forms\Components\Fieldset::make('Store Assignment')
+                    ->schema([
+                        Select::make('locations')
+                            ->label('Stores')
+                            ->multiple()
+                            ->relationship('locations', 'title')
+                            ->options(Location::all()->pluck('title', 'id')->toArray())
+                            ->required(),
+                    ])->columns(1)
+                    ->visible(fn() => auth()->user()->hasRole('Admin')),
             ]);
     }
 
@@ -75,8 +79,8 @@ class UserResource extends Resource
                     ->label('Role')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('brand_name')
-                    ->label('User Brands'),
+                Tables\Columns\TextColumn::make('location_name')
+                    ->label('Stores'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

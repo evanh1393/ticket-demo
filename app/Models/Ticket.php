@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Filament\Forms\Components\Actions;
+use App\Enums\TicketStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,7 +42,36 @@ class Ticket extends Model
         'id' => 'integer',
         'location_id' => 'integer',
         'assigned_to' => 'integer',
+        'status' => TicketStatus::class,
     ];
+
+    /**
+     * Generates a unique display identifier.
+     *
+     * @return string A 7-character uppercase string derived from a unique MD5 hash prefixed by TCKT_.
+     */
+    public static function generateDisplayId(): string
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $displayId = 'TKT_' . substr(md5(uniqid(rand(), true)), 0, 7);
+            if (!self::displayIdExists($displayId)) {
+                return $displayId;
+            }
+        }
+
+        throw new \Exception('Failed to generate a unique display ID after 5 attempts.');
+    }
+
+    /**
+     * Checks if a display ID already exists in the database.
+     *
+     * @param string $displayId
+     * @return bool
+     */
+    protected static function displayIdExists(string $displayId): bool
+    {
+        return self::where('display_id', $displayId)->exists();
+    }
 
     /**
      * Boot method to set the created_by and updated_by fields automatically.
@@ -52,12 +81,18 @@ class Ticket extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $model->created_by = Auth::id();
-            $model->updated_by = Auth::id();
+            if (is_null($model->created_by)) {
+                $model->created_by = Auth::id();
+            }
+            if (is_null($model->updated_by)) {
+                $model->updated_by = Auth::id();
+            }
         });
 
         static::updating(function ($model) {
-            $model->updated_by = Auth::id();
+            if (is_null($model->updated_by)) {
+                $model->updated_by = Auth::id();
+            }
         });
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TicketDepartment;
 use App\Enums\TicketStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -43,6 +44,7 @@ class Ticket extends Model
         'location_id' => 'integer',
         'assigned_to' => 'integer',
         'status' => TicketStatus::class,
+        'department' => TicketDepartment::class,
     ];
 
     /**
@@ -75,6 +77,8 @@ class Ticket extends Model
 
     /**
      * Boot method to set the created_by and updated_by fields automatically.
+     *
+     * We handle basic ticket viewing capabilities here.
      */
     protected static function boot(): void
     {
@@ -92,6 +96,17 @@ class Ticket extends Model
         static::updating(function ($model) {
             if (is_null($model->updated_by)) {
                 $model->updated_by = Auth::id();
+            }
+        });
+
+        static::addGlobalScope('userTickets', function ($builder) {
+            $user = Auth::user();
+            if ($user->hasRole('Store Manager')) {
+                $builder->whereIn('location_id', $user->locations->pluck('id'));
+            }
+
+            if ($user->hasRole('Basic User')) {
+                $builder->where('created_by', $user->id);
             }
         });
     }

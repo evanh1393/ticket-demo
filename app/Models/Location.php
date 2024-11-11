@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Auth;
 
 class Location extends Model
 {
@@ -62,6 +63,20 @@ class Location extends Model
     protected static function displayIdExists(string $displayId): bool
     {
         return self::where('display_id', $displayId)->exists();
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope('userLocations', function ($builder) {
+            $user = Auth::user();
+            if ($user && $user->hasRole('Store Manager')) {
+                $builder->whereHas('users', function ($query) use ($user) {
+                    $query->where('users.id', $user->id);
+                });
+            }
+        });
     }
 
     public function users(): BelongsToMany

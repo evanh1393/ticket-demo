@@ -50,15 +50,27 @@ class UserSeeder extends Seeder
 
         // Create or update a specific user with known credentials
         $evanAdmin = User::updateOrCreate(
-            ['email' => 'evanh1393@gmail.com'], // Specify your email
+            ['email' => 'evanh1393@gmail.com'],
             [
                 'name' => 'Evan Hoefling',
-                'password' => config('defaults.default_user_password'), // Specify your password
+                'password' => config('defaults.default_user_password'),
                 'email_verified_at' => now(),
                 'email' => 'evanh1393@gmail.com'
             ]
         );
 
         $evanAdmin->assignRole($adminRole);
+
+        $joeUser = User::updateOrCreate(
+            ['email' => 'jheary@ivyhilltech.com'],
+            [
+                'name' => 'Joseph Heary',
+                'password' => 'password123',
+                'email_verified_at' => now(),
+                'email' => 'jheary@ivyhilltech.com'
+            ]
+        );
+
+        $joeUser->assignRole($storeManagerRole);
     }
 }

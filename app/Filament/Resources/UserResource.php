@@ -112,8 +112,7 @@ class UserResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ])
-            ->defaultSort('roles.name');
+            ]);
     }
 
     public static function getRelations(): array

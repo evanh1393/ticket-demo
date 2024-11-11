@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TicketDepartment;
 use App\Enums\TicketStatus;
 use App\Models\Location;
 use App\Models\Ticket;
@@ -37,7 +38,7 @@ class TicketFactory extends Factory
             'title' => $this->faker->sentence(4),
             'description' => $this->faker->text(),
             'priority' => $this->faker->word(),
-            'department' => $this->faker->word(),
+            'department' => $this->faker->randomElement(TicketDepartment::cases())->value,
             'location_id' => Location::inRandomOrder()->first()->id,
             'display_id' => Ticket::generateDisplayId(),
             'category' => $this->faker->word(),

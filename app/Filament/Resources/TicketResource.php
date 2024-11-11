@@ -39,9 +39,9 @@ class TicketResource extends Resource
                 Forms\Components\TextInput::make('department')
                     ->required()
                     ->maxLength(255),
-//                Forms\Components\Select::make('location_id')
-//                    ->relationship('location', 'title')
-//                    ->required(),
+                Forms\Components\Select::make('location_id')
+                    ->relationship('location', 'title')
+                    ->required(),
                 Forms\Components\TextInput::make('display_id')
                     ->required()
                     ->maxLength(255),
@@ -77,9 +77,6 @@ class TicketResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('department')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('location.title')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('display_id')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('category')
@@ -107,6 +104,9 @@ class TicketResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('total_tickets')
+                    ->label('Total Tickets')
+                    ->getStateUsing(fn() => Ticket::count()),
             ])
             ->filters([
                 //
@@ -116,7 +116,7 @@ class TicketResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+//                    Tables\Actions\DeleteAction::make(),
                 ]),
             ]);
     }
@@ -124,7 +124,6 @@ class TicketResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
         ];
     }
 

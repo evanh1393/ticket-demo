@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
+use App\Models\Location;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
@@ -83,7 +83,14 @@ class UserResource extends Resource
                     ->label('Role')
                     ->relationship('roles', 'name')
                     ->options(Role::all()->pluck('name', 'id')->toArray()),
-                Tables\Filters\Filter::make,
+                SelectFilter::make('locations')
+                    ->options(fn() => Location::all()->pluck('brand', 'brand'))
+                    ->modifyQueryUsing(function ($query, $state) {
+                        if (!$state['value']) {
+                            return $query;
+                        }
+                        return $query->whereHas('locations', fn($query) => $query->where('brand', $state['value']));
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

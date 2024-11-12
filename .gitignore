@@ -20,4 +20,5 @@ yarn-error.log
 /.idea
 /.vscode
 /.zed
-/storage/debugbar
+/storage/
+/public/storage/

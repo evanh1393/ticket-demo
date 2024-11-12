@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\TicketCategory;
 use App\Enums\TicketDepartment;
+use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Traits\GenerateDisplayId;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 
 class Ticket extends Model
 {
-    use HasFactory;
+    use HasFactory, GenerateDisplayId;
 
     /**
      * The attributes that are mass assignable.
@@ -45,35 +48,9 @@ class Ticket extends Model
         'assigned_to' => 'integer',
         'status' => TicketStatus::class,
         'department' => TicketDepartment::class,
+        'priority' => TicketPriority::class,
+        'category' => TicketCategory::class,
     ];
-
-    /**
-     * Generates a unique display identifier.
-     *
-     * @return string A 7-character uppercase string derived from a unique MD5 hash prefixed by TCKT_.
-     */
-    public static function generateDisplayId(): string
-    {
-        for ($i = 0; $i < 5; $i++) {
-            $displayId = 'TKT_' . substr(md5(uniqid(rand(), true)), 0, 7);
-            if (!self::displayIdExists($displayId)) {
-                return $displayId;
-            }
-        }
-
-        throw new \Exception('Failed to generate a unique display ID after 5 attempts.');
-    }
-
-    /**
-     * Checks if a display ID already exists in the database.
-     *
-     * @param string $displayId
-     * @return bool
-     */
-    protected static function displayIdExists(string $displayId): bool
-    {
-        return self::where('display_id', $displayId)->exists();
-    }
 
     /**
      * Boot method to set the created_by and updated_by fields automatically.
@@ -85,6 +62,7 @@ class Ticket extends Model
         parent::boot();
 
         static::creating(function ($model) {
+            $model->display_id = self::generateDisplayId('TKT');
             if (is_null($model->created_by)) {
                 $model->created_by = Auth::id();
             }
@@ -100,7 +78,13 @@ class Ticket extends Model
         });
 
         static::addGlobalScope('userTickets', function ($builder) {
+            if (app()->runningInConsole() && !app()->runningUnitTests()) {
+                // Skip applying this global scope during seeding
+                return;
+            }
+
             $user = Auth::user();
+
             if ($user->hasRole('Store Manager')) {
                 $builder->whereIn('location_id', $user->locations->pluck('id'));
             }

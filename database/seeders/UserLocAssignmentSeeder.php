@@ -33,5 +33,11 @@ class UserLocAssignmentSeeder extends Seeder
             $storeManager->locations()->attach($locations->random()->id);
         });
 
+        // Add 3 stores to the user with the email jheary@ivyhilltech.com
+        $joeUser = User::where('email', 'jheary@ivyhilltech.com')->first();
+        if ($joeUser) {
+            $joeUserLocations = Location::inRandomOrder()->take(3)->pluck('id');
+            $joeUser->locations()->attach($joeUserLocations);
+        }
     }
 }

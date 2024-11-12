@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\LocationBrand;
 use App\Filament\Resources\LocationResource\Pages;
-use App\Filament\Resources\LocationResource\RelationManagers;
 use App\Models\Location;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -36,9 +36,12 @@ class LocationResource extends Resource
                 Forms\Components\TextInput::make('zip')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('brand')
+                Forms\Components\Select::make('brand')
                     ->required()
-                    ->maxLength(255),
+                    ->options(array_combine(
+                        array_map(fn($brand) => $brand->value, LocationBrand::cases()),
+                        array_map(fn($brand) => $brand->value, LocationBrand::cases())
+                    )),
                 Forms\Components\TextInput::make('display_id')
                     ->required()
                     ->maxLength(255),
@@ -64,7 +67,16 @@ class LocationResource extends Resource
                 Tables\Columns\TextColumn::make('zip')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('brand')
-                    ->searchable(),
+                    ->sortable()
+                    ->badge()
+                    ->color(fn($record) => match ($record->brand->value ?? '') {
+                        LocationBrand::SUBWAY->value => 'primary',
+                        LocationBrand::ROUNDTABLE->value => 'success',
+                        LocationBrand::TACOBELL->value => 'warning',
+                        LocationBrand::DOMINOS->value => 'danger',
+                        LocationBrand::YOGURTLAND->value => 'info',
+                        default => 'secondary',
+                    }),
                 Tables\Columns\TextColumn::make('display_id')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')

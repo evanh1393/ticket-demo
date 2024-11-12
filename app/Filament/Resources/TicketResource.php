@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\TicketCategory;
+use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
 use App\Filament\Resources\TicketResource\Pages;
 use App\Models\Ticket;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Colors\Color;
 use Filament\Tables;
 use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
@@ -26,38 +29,31 @@ class TicketResource extends Resource
                 Forms\Components\TextInput::make('title')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('display_id')
+                    ->disabled()
+                    ->maxLength(255)
+                    ->visibleOn('edit'),
                 Forms\Components\Textarea::make('description')
                     ->required()
                     ->columnSpanFull(),
                 Forms\Components\Select::make('priority')
                     ->required()
-                    ->options([
-                        'High' => 'High',
-                        'Medium' => 'Medium',
-                        'Low' => 'Low',
-                    ]),
+                    ->options(array_combine(
+                        array_map(fn($priority) => $priority->value, TicketPriority::cases()),
+                        array_map(fn($priority) => $priority->value, TicketPriority::cases())
+                    )),
                 Forms\Components\TextInput::make('department')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Select::make('location_id')
                     ->relationship('location', 'title')
                     ->required(),
-                Forms\Components\TextInput::make('display_id')
-                    ->required()
-                    ->maxLength(255),
                 Forms\Components\Select::make('category')
                     ->required()
-                    ->options([
-                        'Point of Sale' => 'Point of Sale',
-                        'Back-office Computer' => 'Back-office Computer',
-                        'Tablet' => 'Tablet',
-                        'MFC Printer/Scanner' => 'MFC Printer/Scanner',
-                        'Receipt Printer' => 'Receipt Printer',
-                        'Telephone' => 'Telephone',
-                        'Internet' => 'Internet',
-                        'Login Issues' => 'Login Issues',
-                        'Other' => 'Other',
-                    ]),
+                    ->options(array_combine(
+                        array_map(fn($category) => $category->value, TicketCategory::cases()),
+                        array_map(fn($category) => $category->value, TicketCategory::cases())
+                    )),
                 Forms\Components\Select::make('status')
                     ->required()
                     ->options(array_combine(
@@ -71,17 +67,23 @@ class TicketResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('display_id')
+                    ->searchable()
+                    ->extraAttributes(['style' => 'font-family: monospace;']),
                 Tables\Columns\TextColumn::make('title')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('priority')
-                    ->searchable(),
+                    ->sortable()
+                    ->badge()
+                    ->color(fn($record) => match ($record->priority->value ?? '') {
+                        TicketPriority::HIGH->value => Color::Rose,
+                        TicketPriority::MEDIUM->value => Color::Yellow,
+                        TicketPriority::LOW->value => Color::Emerald,
+                        default => 'secondary',
+                    }),
                 Tables\Columns\TextColumn::make('department')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('display_id')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('category')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('sub_category')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('assigned_to')
                     ->numeric()
@@ -109,7 +111,13 @@ class TicketResource extends Resource
                     ->getStateUsing(fn() => Ticket::count()),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('priority')
+                    ->options([
+                        TicketPriority::HIGH->value => 'High',
+                        TicketPriority::MEDIUM->value => 'Medium',
+                        TicketPriority::LOW->value => 'Low',
+                    ]),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -118,7 +126,8 @@ class TicketResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
 //                    Tables\Actions\DeleteAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\LocationBrand;
 use App\Models\Location;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -42,8 +43,7 @@ class LocationFactory extends Factory
             'city' => $this->faker->city(),
             'state' => $stateAbbr,
             'zip' => $this->faker->postcode(),
-            'brand' => $this->faker->randomElement(['BrandA', 'BrandB', 'BrandC', 'BrandD', 'BrandE']),
-            'display_id' => Location::generateDisplayId(),
+            'brand' => $this->faker->randomElement(LocationBrand::cases())->value,
             'phone' => $this->faker->phoneNumber(),
         ];
     }

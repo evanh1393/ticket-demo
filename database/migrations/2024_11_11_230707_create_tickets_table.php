@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('location_id');
             $table->string('display_id')->unique();
             $table->string('category');
-            $table->string('sub_category')->nullable();
+            //$table->string('sub_category')->nullable();
             $table->bigInteger('assigned_to')->nullable()->unsigned();
             $table->string('status');
             $table->bigInteger('created_by')->unsigned();
